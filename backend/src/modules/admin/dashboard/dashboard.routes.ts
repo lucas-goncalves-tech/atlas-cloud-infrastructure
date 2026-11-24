@@ -1,0 +1,30 @@
+import "./dashboard.doc";
+
+import { Router } from "express";
+import { container, injectable } from "tsyringe";
+import { DashboardController } from "./dashboard.controller";
+import { validateMiddleware } from "../../../shared/middlewares/validate.middleware";
+import { dashboardQueryDto } from "./dtos/dashboard-querys.dto";
+
+@injectable()
+export class DashboardRoutes {
+  private readonly controller = container.resolve(DashboardController);
+  private readonly router = Router();
+  constructor() {
+    this.setupRoutes();
+  }
+
+  private setupRoutes() {
+    this.router.get("/details", this.controller.getOverviewMetrics);
+
+    this.router.get(
+      "/sales",
+      validateMiddleware({ query: dashboardQueryDto }),
+      this.controller.getLastSales,
+    );
+  }
+
+  get routes() {
+    return this.router;
+  }
+}

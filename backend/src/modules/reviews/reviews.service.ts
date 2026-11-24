@@ -1,0 +1,69 @@
+import { inject, injectable } from "tsyringe";
+import { ReviewRepository } from "./reviews.repository";
+import {
+  ICreateReviewInput,
+  IQueryReviewInput,
+} from "./interface/reviews.interface";
+import { NotFoundError } from "../../shared/errors/not-found-error";
+import { BookRepository } from "../books/books.repository";
+
+@injectable()
+export class ReviewService {
+  constructor(
+    @inject(ReviewRepository)
+    private readonly reviewRepository: ReviewRepository,
+    @inject(BookRepository)
+    private readonly bookRepository: BookRepository,
+  ) {}
+
+  async findManyByBookId(bookId: string, query: IQueryReviewInput) {
+    const book = await this.bookRepository.findById(bookId);
+    if (!book) {
+      throw new NotFoundError("Livro não encontrado");
+    }
+    return await this.reviewRepository.findManyByBookId(
+      bookId,
+      query.page,
+      query.limit,
+    );
+  }
+
+  async findMyReview(userId: string, bookId: string) {
+    const book = await this.bookRepository.findById(bookId);
+    if (!book) {
+      throw new NotFoundError("Livro não encontrado");
+    }
+    const review = await this.reviewRepository.findUniqueByBookId(
+      userId,
+      bookId,
+    );
+    return review;
+  }
+
+  async findManyByUserId(userId: string) {
+    return await this.reviewRepository.findManyByUserId(userId);
+  }
+
+  async create(userId: string, bookId: string, data: ICreateReviewInput) {
+    const book = await this.bookRepository.findById(bookId);
+    if (!book) {
+      throw new NotFoundError("Livro não encontrado");
+    }
+    return await this.reviewRepository.create(userId, bookId, data);
+  }
+
+  async delete(bookId: string, userId: string) {
+    const book = await this.bookRepository.findById(bookId);
+    if (!book) {
+      throw new NotFoundError("Livro não encontrado");
+    }
+    const review = await this.reviewRepository.findUniqueByBookId(
+      userId,
+      bookId,
+    );
+    if (!review) {
+      throw new NotFoundError("Avaliação não encontrada");
+    }
+    await this.reviewRepository.delete(book.id, userId);
+  }
+}

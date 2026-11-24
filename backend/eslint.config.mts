@@ -1,0 +1,29 @@
+// @ts-check
+
+import eslint from "@eslint/js";
+import { defineConfig } from "eslint/config";
+import tseslint from "typescript-eslint";
+
+export default defineConfig(
+  eslint.configs.recommended,
+  tseslint.configs.strict,
+  tseslint.configs.stylistic,
+  {
+    rules: {
+      "no-console": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+    },
+  },
+  {
+    ignores: [
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/prisma/**",
+      "**/coverage/**",
+      "src/tests/global-setup.js",
+    ],
+  },
+);

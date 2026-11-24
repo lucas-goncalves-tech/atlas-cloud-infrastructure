@@ -1,0 +1,26 @@
+import z from "zod";
+import { zodSafeString } from "../../../shared/validators/string.validator";
+import { zodSafeSlug } from "../../../shared/validators/comom.validators";
+
+export const createCategoryDto = z.strictObject({
+  name: zodSafeString.min(3, "O nome deve ter pelo menos 3 caracteres"),
+  slug: zodSafeSlug.min(3, "O slug deve ter pelo menos 3 caracteres"),
+  description: zodSafeString.min(
+    3,
+    "A descrição deve ter pelo menos 3 caracteres",
+  ),
+});
+
+export const updateCategoryDto = createCategoryDto.partial();
+
+export type CreateCategoryDto = z.infer<typeof createCategoryDto>;
+export type UpdateCategoryDto = z.infer<typeof updateCategoryDto>;
+
+export const findCategoryById = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string(),
+});
+
+export const findManyCategoriesResponse = z.array(findCategoryById);

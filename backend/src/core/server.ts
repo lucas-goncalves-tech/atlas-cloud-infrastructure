@@ -1,0 +1,28 @@
+import "reflect-metadata";
+
+import { container } from "tsyringe";
+import "./config/container";
+import { env } from "./config/env";
+import { App } from "../app";
+import { PrismaDB } from "../database/prisma";
+
+const app = container.resolve(App).getServer();
+
+const server = app.listen(env.PORT, "0.0.0.0", () => {
+  //eslint-disable-next-line
+  console.log(`Server is running on port ${env.PORT}`);
+});
+
+const gracefulShutdown = () => {
+  server.close(async () => {
+    await container.resolve(PrismaDB).$disconnect();
+    process.exit(0);
+  });
+  server.closeAllConnections();
+  setTimeout(() => {
+    process.exit(1);
+  }, 5_000).unref();
+};
+
+process.on("SIGINT", gracefulShutdown);
+process.on("SIGTERM", gracefulShutdown);
